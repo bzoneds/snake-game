@@ -18,7 +18,7 @@ Un semplice ma divertente gioco Snake sviluppato utilizzando HTML5 Canvas e Java
 4. Premi Enter per ricominciare dopo il Game Over
 5. Seleziona la velocità desiderata dal menu a tendina
 
-## Tecnologie utilizzate
+## Tecnologie principali utilizzate
 
 - HTML5
 - CSS3
