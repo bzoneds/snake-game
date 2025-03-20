@@ -43,18 +43,14 @@ const rightBtn = document.getElementById('rightBtn');
 // Touch controls
 function handleDirection(newDx, newDy) {
     // Prevent opposite direction
-    if (newDx !== 0 && snake.length > 1 && newDx === -dx) return;
-    if (newDy !== 0 && snake.length > 1 && newDy === -dy) return;
+    if (snake.length > 1) {
+        if ((newDx === 1 && dx === -1) || (newDx === -1 && dx === 1)) return;
+        if ((newDy === 1 && dy === -1) || (newDy === -1 && dy === 1)) return;
+    }
 
     // Update direction
-    if (newDx !== 0 && dy === 0) {
-        dx = newDx;
-        dy = 0;
-    }
-    if (newDy !== 0 && dx === 0) {
-        dx = 0;
-        dy = newDy;
-    }
+    dx = newDx;
+    dy = newDy;
 }
 
 // Improved mobile button controls with better touch response
@@ -146,21 +142,23 @@ speedSelector.addEventListener('change', (e) => {
 
 // Event listener for keyboard controls
 document.addEventListener('keydown', (e) => {
+    if (gameOver && e.key === 'Enter') {
+        resetGame();
+        return;
+    }
+
     switch(e.key) {
         case 'ArrowUp':
-            handleDirection(0, -1);
+            if (dy !== 1) handleDirection(0, -1);
             break;
         case 'ArrowDown':
-            handleDirection(0, 1);
+            if (dy !== -1) handleDirection(0, 1);
             break;
         case 'ArrowLeft':
-            handleDirection(-1, 0);
+            if (dx !== 1) handleDirection(-1, 0);
             break;
         case 'ArrowRight':
-            handleDirection(1, 0);
-            break;
-        case 'Enter':
-            if (gameOver) resetGame();
+            if (dx !== -1) handleDirection(1, 0);
             break;
     }
 });
