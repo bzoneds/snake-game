@@ -3,6 +3,15 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const speedSelector = document.getElementById('gameSpeed');
 
+// Make canvas responsive
+function resizeCanvas() {
+    const maxSize = Math.min(window.innerWidth * 0.95, window.innerHeight * 0.6);
+    canvas.style.width = `${maxSize}px`;
+    canvas.style.height = `${maxSize}px`;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
 // Game constants
 const gridSize = 20;
 const tileCount = canvas.width / gridSize;
@@ -24,6 +33,77 @@ let gameOver = false;
 let gameSpeed = parseInt(speedSelector.value);
 let gameLoop;
 
+// Mobile controls
+const upBtn = document.getElementById('upBtn');
+const downBtn = document.getElementById('downBtn');
+const leftBtn = document.getElementById('leftBtn');
+const rightBtn = document.getElementById('rightBtn');
+
+// Touch controls
+function handleDirection(newDx, newDy) {
+    if (newDx !== 0 && dx === 0) {
+        dx = newDx;
+        dy = 0;
+    }
+    if (newDy !== 0 && dy === 0) {
+        dx = 0;
+        dy = newDy;
+    }
+}
+
+// Mobile button controls
+upBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    handleDirection(0, -1);
+});
+
+downBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    handleDirection(0, 1);
+});
+
+leftBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    handleDirection(-1, 0);
+});
+
+rightBtn.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    handleDirection(1, 0);
+});
+
+// Swipe controls
+let touchStartX = 0;
+let touchStartY = 0;
+const minSwipeDistance = 30;
+
+canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+}, false);
+
+canvas.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+}, false);
+
+canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    
+    const dx = touchEndX - touchStartX;
+    const dy = touchEndY - touchStartY;
+    
+    if (Math.abs(dx) > minSwipeDistance || Math.abs(dy) > minSwipeDistance) {
+        if (Math.abs(dx) > Math.abs(dy)) {
+            handleDirection(dx > 0 ? 1 : -1, 0);
+        } else {
+            handleDirection(0, dy > 0 ? 1 : -1);
+        }
+    }
+}, false);
+
 // Speed change handler
 speedSelector.addEventListener('change', (e) => {
     if (!gameOver) {
@@ -37,28 +117,16 @@ speedSelector.addEventListener('change', (e) => {
 document.addEventListener('keydown', (e) => {
     switch(e.key) {
         case 'ArrowUp':
-            if (dy === 0) {
-                dx = 0;
-                dy = -1;
-            }
+            handleDirection(0, -1);
             break;
         case 'ArrowDown':
-            if (dy === 0) {
-                dx = 0;
-                dy = 1;
-            }
+            handleDirection(0, 1);
             break;
         case 'ArrowLeft':
-            if (dx === 0) {
-                dx = -1;
-                dy = 0;
-            }
+            handleDirection(-1, 0);
             break;
         case 'ArrowRight':
-            if (dx === 0) {
-                dx = 1;
-                dy = 0;
-            }
+            handleDirection(1, 0);
             break;
         case 'Enter':
             if (gameOver) resetGame();
@@ -77,7 +145,7 @@ function drawGame() {
         ctx.textAlign = 'center';
         ctx.fillText('Game Over!', canvas.width/2, canvas.height/2);
         ctx.font = '20px Arial';
-        ctx.fillText('Press Enter to Restart', canvas.width/2, canvas.height/2 + 40);
+        ctx.fillText('Press Enter or Tap to Restart', canvas.width/2, canvas.height/2 + 40);
         return;
     }
 
@@ -90,7 +158,7 @@ function drawGame() {
         score += 10;
         document.getElementById('score').textContent = `Score: ${score}`;
         generateFood();
-        // Increase speed slightly with each food eaten
+        // Increase speed
         if (gameSpeed > 50) {
             gameSpeed = Math.max(50, gameSpeed - 2);
             clearInterval(gameLoop);
@@ -135,12 +203,20 @@ function generateFood() {
     });
 }
 
+// Add touch restart
+canvas.addEventListener('touchstart', (e) => {
+    if (gameOver) {
+        e.preventDefault();
+        resetGame();
+    }
+});
+
 function resetGame() {
     snake = [{ x: 10, y: 10 }];
     dx = 0;
     dy = 0;
     score = 0;
-    gameSpeed = parseInt(speedSelector.value); // Reset to selected speed
+    gameSpeed = parseInt(speedSelector.value);
     gameOver = false;
     document.getElementById('score').textContent = 'Score: 0';
     generateFood();
