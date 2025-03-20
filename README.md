@@ -1,8 +1,8 @@
-# Snake Game for Elettra
+# Snake Game
 
-Un semplice ma divertente gioco Snake sviluppato per Elettra utilizzando HTML5 Canvas e JavaScript.
+Un semplice ma divertente gioco Snake sviluppato utilizzando HTML5 Canvas e JavaScript.
 
-## Caratteristiche
+## Caratteristiche  
 
 - Controllo del serpente con le frecce direzionali
 - Quattro livelli di velocità selezionabili
@@ -27,4 +27,4 @@ Un semplice ma divertente gioco Snake sviluppato per Elettra utilizzando HTML5 C
 
 ## Prova il gioco
 
-Puoi giocare al gioco direttamente qui: [Snake Game for Elettra](https://[tuo-username].github.io/snake-game-elettra/) 
+Puoi giocare al gioco direttamente qui: [Snake Game](https://bzoneds.github.io/snake-game) 
