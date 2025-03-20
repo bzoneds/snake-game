@@ -28,6 +28,7 @@ let dx = 0;
 let dy = 0;
 let score = 0;
 let gameOver = false;
+let lastTouchTime = 0;
 
 // Game speed
 let gameSpeed = parseInt(speedSelector.value);
@@ -41,68 +42,98 @@ const rightBtn = document.getElementById('rightBtn');
 
 // Touch controls
 function handleDirection(newDx, newDy) {
-    if (newDx !== 0 && dx === 0) {
+    // Prevent opposite direction
+    if (newDx !== 0 && snake.length > 1 && newDx === -dx) return;
+    if (newDy !== 0 && snake.length > 1 && newDy === -dy) return;
+
+    // Update direction
+    if (newDx !== 0 && dy === 0) {
         dx = newDx;
         dy = 0;
     }
-    if (newDy !== 0 && dy === 0) {
+    if (newDy !== 0 && dx === 0) {
         dx = 0;
         dy = newDy;
     }
 }
 
-// Mobile button controls
-upBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    handleDirection(0, -1);
-});
+// Improved mobile button controls with better touch response
+function addTouchHandler(btn, dx, dy) {
+    let touchTimeout;
+    
+    btn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handleDirection(dx, dy);
+        
+        // Clear any existing timeout
+        if (touchTimeout) clearTimeout(touchTimeout);
+        
+        // Add active state
+        btn.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
+    }, { passive: false });
 
-downBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    handleDirection(0, 1);
-});
+    btn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        // Remove active state
+        btn.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+        
+        // Clear timeout
+        if (touchTimeout) clearTimeout(touchTimeout);
+    }, { passive: false });
+}
 
-leftBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    handleDirection(-1, 0);
-});
+// Add touch handlers to buttons
+addTouchHandler(upBtn, 0, -1);
+addTouchHandler(downBtn, 0, 1);
+addTouchHandler(leftBtn, -1, 0);
+addTouchHandler(rightBtn, 1, 0);
 
-rightBtn.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    handleDirection(1, 0);
-});
-
-// Swipe controls
+// Swipe controls with improved sensitivity
 let touchStartX = 0;
 let touchStartY = 0;
-const minSwipeDistance = 30;
+const minSwipeDistance = 20; // Reduced minimum swipe distance
+let lastDirection = { dx: 0, dy: 0 };
 
 canvas.addEventListener('touchstart', (e) => {
     e.preventDefault();
     touchStartX = e.touches[0].clientX;
     touchStartY = e.touches[0].clientY;
-}, false);
+    lastTouchTime = Date.now();
+}, { passive: false });
 
 canvas.addEventListener('touchmove', (e) => {
     e.preventDefault();
-}, false);
-
-canvas.addEventListener('touchend', (e) => {
-    e.preventDefault();
-    const touchEndX = e.changedTouches[0].clientX;
-    const touchEndY = e.changedTouches[0].clientY;
     
-    const dx = touchEndX - touchStartX;
-    const dy = touchEndY - touchStartY;
+    // Throttle touch move events
+    const now = Date.now();
+    if (now - lastTouchTime < 32) return; // About 30fps
+    lastTouchTime = now;
+    
+    const touchX = e.touches[0].clientX;
+    const touchY = e.touches[0].clientY;
+    
+    const dx = touchX - touchStartX;
+    const dy = touchY - touchStartY;
     
     if (Math.abs(dx) > minSwipeDistance || Math.abs(dy) > minSwipeDistance) {
         if (Math.abs(dx) > Math.abs(dy)) {
-            handleDirection(dx > 0 ? 1 : -1, 0);
+            const newDx = dx > 0 ? 1 : -1;
+            if (lastDirection.dx !== newDx) {
+                handleDirection(newDx, 0);
+                lastDirection = { dx: newDx, dy: 0 };
+            }
         } else {
-            handleDirection(0, dy > 0 ? 1 : -1);
+            const newDy = dy > 0 ? 1 : -1;
+            if (lastDirection.dy !== newDy) {
+                handleDirection(0, newDy);
+                lastDirection = { dx: 0, dy: newDy };
+            }
         }
+        // Update start position for next move
+        touchStartX = touchX;
+        touchStartY = touchY;
     }
-}, false);
+}, { passive: false });
 
 // Speed change handler
 speedSelector.addEventListener('change', (e) => {
@@ -145,7 +176,7 @@ function drawGame() {
         ctx.textAlign = 'center';
         ctx.fillText('Game Over!', canvas.width/2, canvas.height/2);
         ctx.font = '20px Arial';
-        ctx.fillText('Press Enter or Tap to Restart', canvas.width/2, canvas.height/2 + 40);
+        ctx.fillText('Tocca per Ricominciare', canvas.width/2, canvas.height/2 + 40);
         return;
     }
 
@@ -204,18 +235,19 @@ function generateFood() {
 }
 
 // Add touch restart
-canvas.addEventListener('touchstart', (e) => {
+canvas.addEventListener('touchend', (e) => {
     if (gameOver) {
         e.preventDefault();
         resetGame();
     }
-});
+}, { passive: false });
 
 function resetGame() {
     snake = [{ x: 10, y: 10 }];
     dx = 0;
     dy = 0;
     score = 0;
+    lastDirection = { dx: 0, dy: 0 };
     gameSpeed = parseInt(speedSelector.value);
     gameOver = false;
     document.getElementById('score').textContent = 'Score: 0';
