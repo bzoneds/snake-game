@@ -42,15 +42,27 @@ const rightBtn = document.getElementById('rightBtn');
 
 // Touch controls
 function handleDirection(newDx, newDy) {
-    // Prevent opposite direction
+    // Non permettere il movimento nella direzione opposta
     if (snake.length > 1) {
-        if ((newDx === 1 && dx === -1) || (newDx === -1 && dx === 1)) return;
-        if ((newDy === 1 && dy === -1) || (newDy === -1 && dy === 1)) return;
+        // Se sta andando a destra, non può andare a sinistra
+        if (dx === 1 && newDx === -1) return;
+        // Se sta andando a sinistra, non può andare a destra
+        if (dx === -1 && newDx === 1) return;
+        // Se sta andando giù, non può andare su
+        if (dy === 1 && newDy === -1) return;
+        // Se sta andando su, non può andare giù
+        if (dy === -1 && newDy === 1) return;
     }
 
-    // Update direction
-    dx = newDx;
-    dy = newDy;
+    // Aggiorna la direzione solo se c'è un cambio effettivo
+    if (newDx !== 0) {
+        dx = newDx;
+        dy = 0;
+    }
+    if (newDy !== 0) {
+        dx = 0;
+        dy = newDy;
+    }
 }
 
 // Improved mobile button controls with better touch response
@@ -149,16 +161,16 @@ document.addEventListener('keydown', (e) => {
 
     switch(e.key) {
         case 'ArrowUp':
-            if (dy !== 1) handleDirection(0, -1);
+            handleDirection(0, -1);
             break;
         case 'ArrowDown':
-            if (dy !== -1) handleDirection(0, 1);
+            handleDirection(0, 1);
             break;
         case 'ArrowLeft':
-            if (dx !== 1) handleDirection(-1, 0);
+            handleDirection(-1, 0);
             break;
         case 'ArrowRight':
-            if (dx !== -1) handleDirection(1, 0);
+            handleDirection(1, 0);
             break;
     }
 });
