@@ -117,21 +117,21 @@ canvas {
     }
     
     .title {
-        font-size: 42px;
+        font-size: 48px;
         margin-top: 20px;
         margin-bottom: 20px;
         text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     }
     
     .subtitle {
-        font-size: 24px;
+        font-size: 28px;
         margin-bottom: 25px;
-        line-height: 1.4;
+        line-height: 1.5;
         color: #ecf0f1;
     }
     
     #score {
-        font-size: 32px;
+        font-size: 36px;
         margin-bottom: 20px;
         font-weight: bold;
     }
@@ -146,11 +146,11 @@ canvas {
     }
     
     .speed-control label {
-        font-size: 22px;
+        font-size: 24px;
     }
     
     .speed-control select {
-        font-size: 20px;
+        font-size: 22px;
         padding: 12px 20px;
         min-width: 140px;
     }
@@ -163,11 +163,11 @@ canvas {
 
 @media (max-width: 380px) {
     .title {
-        font-size: 36px;
+        font-size: 42px;
     }
     
     .subtitle {
-        font-size: 20px;
+        font-size: 24px;
     }
     
     .speed-control {
